@@ -16,7 +16,7 @@
   <div class="sidebar">
     <a href="#home" class="nav-link">
         <span class="icon"><i  class="fa-solid fa-house"></i></span>
-      <span class="link-text">About</span>
+      <span class="link-text">Home</span>
     </a>
     <a href="#projects" class="nav-link">
       <span class="icon"><i class="fa-solid fa-photo-film"></i></span>
@@ -43,7 +43,6 @@
 
 </body>
 </html>
-
 
 
 
