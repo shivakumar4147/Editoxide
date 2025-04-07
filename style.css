@@ -1,0 +1,178 @@
+@import url('https://fonts.googleapis.com/css2?family=Michroma&family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merienda:wght@300..900&family=Michroma&family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #000000;
+    display: flex;
+  }
+  h1{
+    font-family: michroma;
+    font-weight: 1000;
+    font-size: 300%;
+  }
+  
+ 
+  .sidebar {
+    position: fixed;
+    top: 20px;
+    left: 0;
+    height: calc(100vh - 40px);
+    width: 70px;
+    background: linear-gradient(to top, rgb(0, 0, 0),  rgb(255, 0, 0));
+    transition: width 0.3s ease;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
+    padding: 20px 10px;
+    overflow: hidden;
+    z-index: 1000;
+    box-shadow: 4px 0 10px rgba(255, 6, 6, 0.1);
+  }
+
+  .sidebar:hover {
+    width: 220px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 20px;
+    margin-right: 18px;
+    color: rgb(255, 255, 255);
+    text-decoration: none;
+    margin-bottom: 15px;
+    background-color: transparent;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 40px;
+    transition: transform 0.2s ease, background 0.3s ease;
+  }
+
+  .nav-link:hover {
+    background-color: #000000;
+    transform: scale(1.08);
+  }
+
+  .icon {
+    font-size: 20px;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .link-text {
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar:hover .link-text {
+    opacity: 1;
+  }
+
+  .main-content {
+    margin-left: 90px;
+    padding: 40px;
+    width: 100%;
+    color: rgb(255, 255, 255);
+    transition: margin-left 0.3s ease;
+  }
+
+  .sidebar:hover ~ .main-content {
+    margin-left: 240px;
+  }
+
+
+
+
+
+  
+
+
+.animated-text{
+    font-size: 34px;
+    font-weight: 600;
+    min-width: 280px;
+    
+}
+
+.animated-text span{
+    position: relative;
+}
+
+.animated-text span::before{
+    content: "Youtuber";
+    color: #ff0000;
+    animation: words 20s infinite;
+}
+
+.animated-text span::after{
+    content: "";
+    position: absolute;
+    width: calc(100% + 8px);
+    height: 100%;
+    background-color: #000000;
+    border-left: 2px solid #ff0000;
+    right: -8px;
+    animation: cursor .8s infinite, typing 20s steps(14) infinite;
+}
+
+@keyframes cursor {
+    to{
+        border-left: 2px solid #ff7f5000;
+    }
+}
+
+@keyframes words {
+    0%,20%{
+        content: "Editor";
+    }
+    21%,40%{
+        content: "Youtuber";
+    }
+    41%,60%{
+        content: "Developer";
+    }
+    61%,80%{
+        content: "Designer";
+    }
+    81%,100%{
+        content: "Gamer";
+    }
+}
+
+@keyframes typing {
+    10%,15%,30%,35%,50%,55%,70%,75%,90%,95%{
+        width: 0;
+    }
+    5%,20%,25%,40%,45%,60%,65%,80%,85%{
+        width: calc(100% + 8px);
+    }
+}
+
+
+
+
+
+.animation span{
+    position: relative;
+  }
+  .animation span::before{
+    content: Editor;
+    color: red;
+  }
+  .animation span::after{
+    content: Youtuber;
+    position: absolute;
+    width: 0;
+    height: 100%;
+    background-color: rgb(0, 0, 0);
+    border-left: 2px solid rgb(255, 255, 255);
+    right: -8px;
+    animation: cursor .8s infinite;
+  }
+  @keyframes cursor {
+    to{
+        border-left: 2px solid rgb(255, 255, 255);
+    }
+    
+  }
