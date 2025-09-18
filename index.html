@@ -231,9 +231,12 @@
     <!-- Comments list -->
     <div id="comments-list" class="list" aria-live="polite" aria-atomic="true"></div>
 
-    <div class="center muted" style="margin-top:10px;font-size:10px">The comment will help me to improve more...</div>
+    <div class="center muted" style="margin-top:10px;font-size:10px">
+      The comment will help me to improve more...
+    </div>
   </div>
 </div>
+
 
 
 
@@ -313,11 +316,9 @@ const listEl = document.getElementById('comments-list');
 const input = document.getElementById('comment-input');
 const sendBtn = document.getElementById('send-btn');
 
-let state = {
-  comments: [] // {id, text, ts, likes, liked, replies: [{id,text,ts,likes,liked}]}
-};
+let state = { comments: [] };
 
-// helpers
+// Helpers
 const id = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const nowText = ts => {
   const s = Math.floor((Date.now()-ts)/1000);
@@ -327,26 +328,27 @@ const nowText = ts => {
   if (s < 86400) return Math.floor(s/3600) + 'h';
   return new Date(ts).toLocaleDateString();
 };
-
-function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-function load(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) state = JSON.parse(raw);
-  }catch(e){ state = {comments:[]}; }
-}
-function randomEmojiSeed(){
+const randomEmojiSeed = () => {
   const set = ['🔥','✨','🚀','🎯','💡','🎵','🌙','🌟','⚡','🍁','🍒','🪐','🎮'];
   return set[Math.floor(Math.random()*set.length)];
+};
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) state = JSON.parse(raw);
+  } catch(e){ state = {comments:[]}; }
 }
 
-// render comments
+// Render comments
 function render(){
   listEl.innerHTML = '';
   if(!state.comments.length){
     listEl.innerHTML = '<div class="muted center">No comments yet — be the first!</div>';
     return;
   }
+
   state.comments.slice().reverse().forEach(c => {
     const item = document.createElement('div');
     item.className = 'item';
@@ -368,8 +370,7 @@ function render(){
     time.className = 'time muted';
     time.textContent = nowText(c.ts);
 
-    head.appendChild(name);
-    head.appendChild(time);
+    head.appendChild(name); head.appendChild(time);
 
     const text = document.createElement('div');
     text.className = 'text';
@@ -378,7 +379,6 @@ function render(){
     const controls = document.createElement('div');
     controls.className = 'controls';
 
-    // like button
     const likeBtn = document.createElement('button');
     likeBtn.className = 'icon-btn';
     likeBtn.innerHTML = `❤ <span class="count">${c.likes||0}</span>`;
@@ -390,30 +390,19 @@ function render(){
       save(); render();
     });
 
-    // reply button
     const replyBtn = document.createElement('button');
     replyBtn.className = 'icon-btn';
     replyBtn.innerHTML = '↩ Reply';
-    replyBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      showReplyBox(item, c);
-    });
+    replyBtn.addEventListener('click', (e) => { e.stopPropagation(); showReplyBox(item, c); });
 
-    // replies count
     const replyCount = document.createElement('div');
     replyCount.className = 'muted';
     replyCount.textContent = (c.replies?.length || 0) + ' replies';
 
-    controls.appendChild(likeBtn);
-    controls.appendChild(replyBtn);
-    controls.appendChild(replyCount);
+    controls.appendChild(likeBtn); controls.appendChild(replyBtn); controls.appendChild(replyCount);
 
-    meta.appendChild(head);
-    meta.appendChild(text);
-    meta.appendChild(controls);
-
-    item.appendChild(avatar);
-    item.appendChild(meta);
+    meta.appendChild(head); meta.appendChild(text); meta.appendChild(controls);
+    item.appendChild(avatar); item.appendChild(meta);
 
     // replies
     const repliesWrap = document.createElement('div');
@@ -425,11 +414,11 @@ function render(){
 
       const rav = document.createElement('div');
       rav.className = 'avatar';
-      rav.style.width = '36px'; rav.style.height='36px';
+      rav.style.width='36px'; rav.style.height='36px';
       rav.textContent = r.avatar || randomEmojiSeed();
 
       const rmeta = document.createElement('div');
-      rmeta.style.flex = '1';
+      rmeta.style.flex='1';
       rmeta.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
           <div style="font-weight:700">${r.name||'Anonymous'}</div>
           <div class="muted" style="font-size:12px">${nowText(r.ts)}</div>
@@ -437,77 +426,69 @@ function render(){
         <div style="font-size:14px;color:#eaeaea">${r.text}</div>`;
 
       const rcontrols = document.createElement('div');
-      rcontrols.style.marginTop = '8px'; rcontrols.style.display='flex'; rcontrols.style.gap='8px';
+      rcontrols.style.marginTop='8px'; rcontrols.style.display='flex'; rcontrols.style.gap='8px';
       const rlike = document.createElement('button');
       rlike.className = 'icon-btn';
       rlike.innerHTML = `❤ <span class="count">${r.likes||0}</span>`;
       if(r.liked) rlike.classList.add('liked');
-      rlike.addEventListener('click', (ev)=>{ ev.stopPropagation(); r.liked = !r.liked; r.likes = (r.likes||0)+(r.liked?1:-1); save(); render(); });
+      rlike.addEventListener('click', (ev)=>{ ev.stopPropagation(); r.liked = !r.liked; r.likes=(r.likes||0)+(r.liked?1:-1); save(); render(); });
 
       rcontrols.appendChild(rlike);
 
       attachLongPress(rp, () => {
-        if(confirm('Delete this reply?')) {
+        if(confirm('Delete this reply?')){
           c.replies = (c.replies||[]).filter(x=>x.id!==r.id);
           save(); render();
         }
       });
 
-      rp.appendChild(rav); rp.appendChild(rmeta);
-      rp.appendChild(rcontrols);
+      rp.appendChild(rav); rp.appendChild(rmeta); rp.appendChild(rcontrols);
       repliesWrap.appendChild(rp);
     });
 
     item.appendChild(repliesWrap);
 
     attachLongPress(item, () => {
-      if(confirm('Delete this comment and its replies?')) {
+      if(confirm('Delete this comment and its replies?')){
         state.comments = state.comments.filter(x=>x.id!==c.id);
-        save();
-        render();
+        save(); render();
       }
     });
 
     listEl.appendChild(item);
   });
+
+  // scroll to bottom of comments
+  listEl.scrollTo({ top: listEl.scrollHeight, behavior:'smooth' });
 }
 
 // reply box
 function showReplyBox(itemEl, comment){
   document.querySelectorAll('.reply-box').forEach(el=>el.remove());
-
   const box = document.createElement('div');
   box.className = 'reply-box';
   box.innerHTML = `<input placeholder="Reply anonymously..." aria-label="Reply"><button class="btn">Reply</button>`;
   const inputEl = box.querySelector('input');
   const btn = box.querySelector('button');
 
-  btn.addEventListener('click', ()=> {
+  btn.addEventListener('click', () => {
     const val = inputEl.value.trim();
     if(!val) return alert('Enter a reply');
-    const reply = { id: id(), text: val, ts: Date.now(), likes:0, liked:false, name:'Anonymous', avatar: randomEmojiSeed() };
+    const reply = { id:id(), text:val, ts:Date.now(), likes:0, liked:false, name:'Anonymous', avatar:randomEmojiSeed() };
     comment.replies = comment.replies || [];
     comment.replies.push(reply);
-    save();
-    render();
-    document.getElementById('comment-input').focus();
+    save(); render();
+    input.focus();
   });
 
-  itemEl.after(box);
-  inputEl.focus();
+  itemEl.after(box); inputEl.focus();
 }
 
 // long-press
 function attachLongPress(el, callback){
-  let timer = null;
-  const delay = 700;
-  function start(e){
-    e.preventDefault?.();
-    timer = setTimeout(()=>{ callback(); timer=null; }, delay);
-  }
-  function cancel(){
-    if(timer){ clearTimeout(timer); timer=null; }
-  }
+  let timer=null; const delay=700;
+  function start(e){ e.preventDefault?.(); timer=setTimeout(()=>{ callback(); timer=null; }, delay); }
+  function cancel(){ if(timer){ clearTimeout(timer); timer=null; } }
   el.addEventListener('mousedown', start);
   el.addEventListener('touchstart', start);
   el.addEventListener('mouseup', cancel);
@@ -518,15 +499,14 @@ function attachLongPress(el, callback){
 
 // UI wiring
 input.addEventListener('input', ()=> sendBtn.disabled = !input.value.trim());
-sendBtn.addEventListener('click', (e)=> {
+sendBtn.addEventListener('click', (e) => {
   e.preventDefault();
   const text = input.value.trim();
   if(!text) return;
-  const c = { id: id(), text, ts: Date.now(), likes:0, liked:false, replies:[], name:'Anonymous', avatar: randomEmojiSeed() };
+  const c = { id:id(), text, ts:Date.now(), likes:0, liked:false, replies:[], name:'Anonymous', avatar:randomEmojiSeed() };
   state.comments.push(c);
   input.value=''; sendBtn.disabled=true;
   save(); render();
-  listEl.scrollTop = listEl.scrollHeight;
 });
 
 input.addEventListener('keydown', (e)=>{
@@ -537,8 +517,7 @@ input.addEventListener('keydown', (e)=>{
 });
 
 // init
-load();
-render();
+load(); render();
 
 </script>
 
