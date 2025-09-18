@@ -218,7 +218,8 @@
     <div class="composer" aria-hidden="false">
       <div class="avatar" id="composer-avatar">👤</div>
       <div class="box">
-        <textarea id="comment-input" placeholder="Add a comment... (anonymous)" aria-label="Add a comment"></textarea>
+        <textarea id="comment-input" placeholder="Add a comment..." aria-label="Add a comment"></textarea>
+
         <div class="row">
           <div class="muted" style="font-size: 10px;">Be kind — anyone can comment anonymously</div>
           <div>
@@ -266,7 +267,8 @@
 
 
 
-
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 <script>
     /*mode change*/
@@ -310,215 +312,223 @@ document.querySelectorAll('.nav-link').forEach(link => {
   - comments stored in localStorage under key 'ig_comments_demo_v2'
   - supports replies (one level), likes, delete (long-press)
 */
+// Initialize Firebase
+  
+  document.addEventListener('DOMContentLoaded', () => {
 
-const STORAGE_KEY = 'ig_comments_demo_v2';
-const listEl = document.getElementById('comments-list');
-const input = document.getElementById('comment-input');
-const sendBtn = document.getElementById('send-btn');
-
-let state = { comments: [] };
-
-// Helpers
-const id = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-const nowText = ts => {
-  const s = Math.floor((Date.now()-ts)/1000);
-  if (s < 5) return 'just now';
-  if (s < 60) return s + 's';
-  if (s < 3600) return Math.floor(s/60) + 'm';
-  if (s < 86400) return Math.floor(s/3600) + 'h';
-  return new Date(ts).toLocaleDateString();
+  // ====== FIREBASE SETUP ======
+  const firebaseConfig = {
+  apiKey: "AIzaSyDUk_wc3Mn2Zgibqi2P1POW641OTsn1vUE",
+  authDomain: "myportfolio-853f9.firebaseapp.com",
+  databaseURL: "https://myportfolio-853f9-default-rtdb.firebaseio.com",
+  projectId: "myportfolio-853f9",
+  storageBucket: "myportfolio-853f9.firebasestorage.app",
+  messagingSenderId: "985132342829",
+  appId: "1:985132342829:web:fd4176afe88b19de8162a4",
+  measurementId: "G-XJKYVP9FXW"
 };
-const randomEmojiSeed = () => {
-  const set = ['🔥','✨','🚀','🎯','💡','🎵','🌙','🌟','⚡','🍁','🍒','🪐','🎮'];
-  return set[Math.floor(Math.random()*set.length)];
-};
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const commentsRef = db.collection('comments');
 
-function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-function load() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) state = JSON.parse(raw);
-  } catch(e){ state = {comments:[]}; }
-}
+  // ====== ELEMENTS ======
+  const listEl = document.getElementById('comments-list');
+  const input = document.getElementById('comment-input');
+  const sendBtn = document.getElementById('send-btn');
 
-// Render comments
-function render(){
-  listEl.innerHTML = '';
-  if(!state.comments.length){
-    listEl.innerHTML = '<div class="muted center">No comments yet — be the first!</div>';
-    return;
+  // ====== HELPERS ======
+  const id = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  const nowText = ts => {
+    const s = Math.floor((Date.now()-ts)/1000);
+    if(s<5) return 'just now';
+    if(s<60) return s+'s';
+    if(s<3600) return Math.floor(s/60)+'m';
+    if(s<86400) return Math.floor(s/3600)+'h';
+    return new Date(ts).toLocaleDateString();
+  };
+  const randomEmojiSeed = () => {
+    const set = ['🔥','✨','🚀','🎯','💡','🎵','🌙','🌟','⚡','🍁','🍒','🪐','🎮'];
+    return set[Math.floor(Math.random()*set.length)];
+  };
+
+  // ====== POST BUTTON ENABLE ======
+  function updateButton() {
+    sendBtn.disabled = input.value.trim().length === 0;
   }
+  input.addEventListener('input', updateButton);
+  updateButton();
 
-  state.comments.slice().reverse().forEach(c => {
-    const item = document.createElement('div');
-    item.className = 'item';
-    item.dataset.id = c.id;
+  // ====== RENDER COMMENTS ======
+  function renderComments(comments) {
+    listEl.innerHTML = '';
+    if(comments.length === 0){
+      listEl.innerHTML = '<div class="muted center">No comments yet — be the first!</div>';
+      return;
+    }
 
-    const avatar = document.createElement('div');
-    avatar.className = 'avatar';
-    avatar.textContent = c.avatar || randomEmojiSeed();
+    comments.slice().reverse().forEach(c => {
+      const item = document.createElement('div');
+      item.className = 'item';
+      item.dataset.id = c.id;
 
-    const meta = document.createElement('div');
-    meta.className = 'meta';
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.textContent = c.avatar || randomEmojiSeed();
 
-    const head = document.createElement('div');
-    head.className = 'head';
-    const name = document.createElement('div');
-    name.className = 'name';
-    name.textContent = c.name || 'Anonymous';
-    const time = document.createElement('div');
-    time.className = 'time muted';
-    time.textContent = nowText(c.ts);
+      const meta = document.createElement('div');
+      meta.className = 'meta';
 
-    head.appendChild(name); head.appendChild(time);
+      const head = document.createElement('div');
+      head.className = 'head';
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = c.name || 'Anonymous';
+      const time = document.createElement('div');
+      time.className = 'time muted';
+      time.textContent = nowText(c.ts);
 
-    const text = document.createElement('div');
-    text.className = 'text';
-    text.textContent = c.text;
+      head.appendChild(name); head.appendChild(time);
 
-    const controls = document.createElement('div');
-    controls.className = 'controls';
+      const text = document.createElement('div');
+      text.className = 'text';
+      text.textContent = c.text;
 
-    const likeBtn = document.createElement('button');
-    likeBtn.className = 'icon-btn';
-    likeBtn.innerHTML = `❤ <span class="count">${c.likes||0}</span>`;
-    if(c.liked) likeBtn.classList.add('liked');
-    likeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      c.liked = !c.liked;
-      c.likes = (c.likes||0) + (c.liked?1:-1);
-      save(); render();
-    });
+      const controls = document.createElement('div');
+      controls.className = 'controls';
 
-    const replyBtn = document.createElement('button');
-    replyBtn.className = 'icon-btn';
-    replyBtn.innerHTML = '↩ Reply';
-    replyBtn.addEventListener('click', (e) => { e.stopPropagation(); showReplyBox(item, c); });
+      const likeBtn = document.createElement('button');
+      likeBtn.className = 'icon-btn';
+      likeBtn.innerHTML = `❤ <span class="count">${c.likes||0}</span>`;
+      if(c.liked) likeBtn.classList.add('liked');
+      likeBtn.addEventListener('click', async e => {
+        e.stopPropagation();
+        await commentsRef.doc(c.id).update({ likes: (c.likes||0) + (c.liked? -1 : 1), liked: !c.liked });
+      });
 
-    const replyCount = document.createElement('div');
-    replyCount.className = 'muted';
-    replyCount.textContent = (c.replies?.length || 0) + ' replies';
+      const replyBtn = document.createElement('button');
+      replyBtn.className = 'icon-btn';
+      replyBtn.innerHTML = '↩ Reply';
+      replyBtn.addEventListener('click', e => { e.stopPropagation(); showReplyBox(item, c); });
 
-    controls.appendChild(likeBtn); controls.appendChild(replyBtn); controls.appendChild(replyCount);
+      const replyCount = document.createElement('div');
+      replyCount.className = 'muted';
+      replyCount.textContent = (c.replies?.length || 0) + ' replies';
 
-    meta.appendChild(head); meta.appendChild(text); meta.appendChild(controls);
-    item.appendChild(avatar); item.appendChild(meta);
+      controls.appendChild(likeBtn);
+      controls.appendChild(replyBtn);
+      controls.appendChild(replyCount);
 
-    // replies
-    const repliesWrap = document.createElement('div');
-    repliesWrap.className = 'replies';
-    (c.replies || []).forEach(r => {
-      const rp = document.createElement('div');
-      rp.className = 'reply';
-      rp.dataset.rid = r.id;
+      meta.appendChild(head);
+      meta.appendChild(text);
+      meta.appendChild(controls);
+      item.appendChild(avatar);
+      item.appendChild(meta);
 
-      const rav = document.createElement('div');
-      rav.className = 'avatar';
-      rav.style.width='36px'; rav.style.height='36px';
-      rav.textContent = r.avatar || randomEmojiSeed();
+      // ====== RENDER REPLIES ======
+      const repliesWrap = document.createElement('div');
+      repliesWrap.className = 'replies';
+      (c.replies || []).forEach(r => {
+        const rp = document.createElement('div');
+        rp.className = 'reply';
+        rp.dataset.rid = r.id;
 
-      const rmeta = document.createElement('div');
-      rmeta.style.flex='1';
-      rmeta.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        const rav = document.createElement('div');
+        rav.className = 'avatar';
+        rav.style.width='36px'; rav.style.height='36px';
+        rav.textContent = r.avatar || randomEmojiSeed();
+
+        const rmeta = document.createElement('div');
+        rmeta.style.flex='1';
+        rmeta.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
           <div style="font-weight:700">${r.name||'Anonymous'}</div>
           <div class="muted" style="font-size:12px">${nowText(r.ts)}</div>
         </div>
         <div style="font-size:14px;color:#eaeaea">${r.text}</div>`;
 
-      const rcontrols = document.createElement('div');
-      rcontrols.style.marginTop='8px'; rcontrols.style.display='flex'; rcontrols.style.gap='8px';
-      const rlike = document.createElement('button');
-      rlike.className = 'icon-btn';
-      rlike.innerHTML = `❤ <span class="count">${r.likes||0}</span>`;
-      if(r.liked) rlike.classList.add('liked');
-      rlike.addEventListener('click', (ev)=>{ ev.stopPropagation(); r.liked = !r.liked; r.likes=(r.likes||0)+(r.liked?1:-1); save(); render(); });
+        rp.appendChild(rav); rp.appendChild(rmeta);
+        repliesWrap.appendChild(rp);
+      });
+      item.appendChild(repliesWrap);
 
-      rcontrols.appendChild(rlike);
-
-      attachLongPress(rp, () => {
-        if(confirm('Delete this reply?')){
-          c.replies = (c.replies||[]).filter(x=>x.id!==r.id);
-          save(); render();
+      // ====== LONG PRESS DELETE ======
+      attachLongPress(item, async () => {
+        if(confirm('Delete this comment and its replies?')){
+          await commentsRef.doc(c.id).delete();
         }
       });
 
-      rp.appendChild(rav); rp.appendChild(rmeta); rp.appendChild(rcontrols);
-      repliesWrap.appendChild(rp);
+      listEl.appendChild(item);
     });
 
-    item.appendChild(repliesWrap);
-
-    attachLongPress(item, () => {
-      if(confirm('Delete this comment and its replies?')){
-        state.comments = state.comments.filter(x=>x.id!==c.id);
-        save(); render();
-      }
-    });
-
-    listEl.appendChild(item);
-  });
-
-  // scroll to bottom of comments
-  listEl.scrollTo({ top: listEl.scrollHeight, behavior:'smooth' });
-}
-
-// reply box
-function showReplyBox(itemEl, comment){
-  document.querySelectorAll('.reply-box').forEach(el=>el.remove());
-  const box = document.createElement('div');
-  box.className = 'reply-box';
-  box.innerHTML = `<input placeholder="Reply anonymously..." aria-label="Reply"><button class="btn">Reply</button>`;
-  const inputEl = box.querySelector('input');
-  const btn = box.querySelector('button');
-
-  btn.addEventListener('click', () => {
-    const val = inputEl.value.trim();
-    if(!val) return alert('Enter a reply');
-    const reply = { id:id(), text:val, ts:Date.now(), likes:0, liked:false, name:'Anonymous', avatar:randomEmojiSeed() };
-    comment.replies = comment.replies || [];
-    comment.replies.push(reply);
-    save(); render();
-    input.focus();
-  });
-
-  itemEl.after(box); inputEl.focus();
-}
-
-// long-press
-function attachLongPress(el, callback){
-  let timer=null; const delay=700;
-  function start(e){ e.preventDefault?.(); timer=setTimeout(()=>{ callback(); timer=null; }, delay); }
-  function cancel(){ if(timer){ clearTimeout(timer); timer=null; } }
-  el.addEventListener('mousedown', start);
-  el.addEventListener('touchstart', start);
-  el.addEventListener('mouseup', cancel);
-  el.addEventListener('mouseleave', cancel);
-  el.addEventListener('touchend', cancel);
-  el.addEventListener('touchcancel', cancel);
-}
-
-// UI wiring
-input.addEventListener('input', ()=> sendBtn.disabled = !input.value.trim());
-sendBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-  const text = input.value.trim();
-  if(!text) return;
-  const c = { id:id(), text, ts:Date.now(), likes:0, liked:false, replies:[], name:'Anonymous', avatar:randomEmojiSeed() };
-  state.comments.push(c);
-  input.value=''; sendBtn.disabled=true;
-  save(); render();
-});
-
-input.addEventListener('keydown', (e)=>{
-  if(e.key==='Enter' && !e.shiftKey){
-    e.preventDefault();
-    if(!sendBtn.disabled) sendBtn.click();
+    listEl.scrollTo({ top: listEl.scrollHeight, behavior:'smooth' });
   }
+
+  // ====== REPLY BOX ======
+  function showReplyBox(itemEl, comment){
+    document.querySelectorAll('.reply-box').forEach(el => el.remove());
+    const box = document.createElement('div');
+    box.className = 'reply-box';
+    box.innerHTML = `<input placeholder="Reply anonymously..." aria-label="Reply"><button class="btn">Reply</button>`;
+    const inputEl = box.querySelector('input');
+    const btn = box.querySelector('button');
+
+    btn.addEventListener('click', async () => {
+      const val = inputEl.value.trim();
+      if(!val) return alert('Enter a reply');
+      const reply = { id:id(), text:val, ts:Date.now(), name:'Anonymous', avatar:randomEmojiSeed() };
+      const updatedReplies = [...(comment.replies||[]), reply];
+      await commentsRef.doc(comment.id).update({ replies: updatedReplies });
+      inputEl.value = '';
+    });
+
+    itemEl.after(box);
+    inputEl.focus();
+  }
+
+  // ====== LONG PRESS HELPER ======
+  function attachLongPress(el, callback){
+    let timer=null; const delay=700;
+    function start(e){ e.preventDefault?.(); timer=setTimeout(()=>{ callback(); timer=null; }, delay); }
+    function cancel(){ if(timer){ clearTimeout(timer); timer=null; } }
+    el.addEventListener('mousedown', start);
+    el.addEventListener('touchstart', start);
+    el.addEventListener('mouseup', cancel);
+    el.addEventListener('mouseleave', cancel);
+    el.addEventListener('touchend', cancel);
+    el.addEventListener('touchcancel', cancel);
+  }
+
+  // ====== POST NEW COMMENT ======
+  sendBtn.addEventListener('click', async e => {
+    e.preventDefault();
+    const val = input.value.trim();
+    if(!val) return;
+    input.value = '';
+    updateButton();
+
+    await commentsRef.doc(id()).set({
+      text: val,
+      ts: Date.now(),
+      likes: 0,
+      liked: false,
+      replies: [],
+      name: 'Anonymous',
+      avatar: randomEmojiSeed()
+    });
+  });
+
+  input.addEventListener('keydown', e => {
+    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); if(!sendBtn.disabled) sendBtn.click(); }
+  });
+
+  // ====== LISTEN TO FIRESTORE CHANGES ======
+  commentsRef.orderBy('ts', 'asc').onSnapshot(snapshot => {
+    const allComments = [];
+    snapshot.forEach(doc => allComments.push({ id: doc.id, ...doc.data() }));
+    renderComments(allComments);
+  });
+
 });
-
-// init
-load(); render();
-
 </script>
 
 </html>
