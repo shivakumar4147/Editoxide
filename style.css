@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300..800;1,300..800&family=Merienda:wght@300..900&family=Michroma&family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Macondo&family=Special+Elite&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Doto:wght@100..900&family=Macondo&family=Special+Elite&display=swap');
 *{
     margin: 0;
     padding: 0;
@@ -177,7 +177,7 @@ body.light .bulb {
 .h12 {
     font-family: "Macondo", cursive;
     font-weight: 400;
-    font-size: 70px;
+    font-size: 80px;
     font-style: normal;
     font-weight: 1000;
     font-size: 300% 48px;
@@ -254,7 +254,11 @@ body.light .bulb {
       margin-top: -20%;
     }
     h1.myworke{
-      display: none;
+      font-family: "Doto", sans-serif;
+      margin-top: 100px;
+      margin-left: 45%;
+      text-decoration: underline red 2px;
+      margin-bottom: -8px;
     }
 
     /* Circle path (white ring) */
@@ -486,11 +490,9 @@ width: 100%;
     font-weight: 1000;
     font-size: 250% 48px;
     }
-    h1.mywork1{
-      display: none;
-    }
     h1.myworke{
-      margin-left: 13px;
+      margin-left: 16px;
+      font-family: "Doto", sans-serif;
     }
     .main-content {
     padding-left: 100px;
@@ -575,6 +577,8 @@ width: 100%;
       width: 250px;
       height: 250px;
       border-radius: 50%;
+      align-items: center;
+      display: flex;
       position: absolute;
       top: 50%;
       left: 50%;
@@ -591,8 +595,18 @@ width: 100%;
       height: 35px;
     }
 
+
+
+    .timeline::after {
+  max-height: 1700px;
+}
+
+
+
+
+
   /* Timeline responsive stack for phones */
-  .timeline{ padding: 80px 0; max-width: 100%; height: auto; }
+  .timeline{ padding: 80px 0;  height: auto; }
   .timeline::after{ left: 16px; margin-left: 0; }
   .timeline-item{ 
     width: calc(100% - 32px); 
@@ -606,20 +620,96 @@ width: 100%;
   .timeline-item::after{ left: 22px; right: auto; width: 24px; }
   
   /* Single container for image and info on mobile */
-  .timeline-item .content,
-  .textbro_1, 
-  .textbro_2{ 
-    width: 100%; 
-    margin: 0; 
-    padding: 18px; 
-    background: linear-gradient(to top, rgba(0,0,0,0.6), rgba(255,30,30,0.15)); 
-    border: 1px solid rgba(255,0,0,0.25); 
-    border-radius: 16px; 
+  
+
+
+
+
+
+.timeline-item {
+    width: 80%;              /* take most of the width */
+    max-width: 400px;        /* optional: limit so it doesn’t get too wide */
+    margin: 20px auto; 
+    padding: 18px;
+    background: linear-gradient(to top, rgba(0,0,0,0.6), rgba(255,30,30,0.15));
+    border: 1px solid rgba(255,0,0,0.25);
+    border-radius: 16px;
     backdrop-filter: blur(10px);
     display: flex;
     flex-direction: column;
     gap: 12px;
+    
   }
+
+  /* Reset image styles inside the card */
+  .timeline-item .content {
+    width: 100%;
+    border-radius: 12px;
+    padding: 0; 
+    margin: 0;
+    background: none;
+    border: none;
+    backdrop-filter: none;
+    display: block;
+  }
+
+  /* Text inside the card */
+  .timeline-item .textbro_1,
+  .timeline-item .textbro_2 {
+    width: 100%;
+    padding: 15px;
+    margin: 0;
+    background: none;
+    border: none;
+    backdrop-filter: none;
+    display: block;
+  }
+
+  /* Light mode support */
+  body.light .timeline-item {
+    background: linear-gradient(to top, rgba(255,255,255,0.7), rgba(255,30,30,0.15));
+    border-color: rgba(255,0,0,0.28);
+  }
+
+  .timeline-item.left::before{
+    margin-left: -12.5%;
+  }
+  .timeline-item.left::after{
+    margin-left: -12.5%;
+    z-index: -10;
+  }
+  .timeline-item.right::before{
+    margin-left: -4.8%;
+  }
+  .timeline-item.right::after{
+    margin-left: -6.2%;
+    z-index: -10;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   
   .timeline-item .content:hover{ transform: none; }
   
@@ -642,8 +732,10 @@ width: 100%;
 }
 
 /* Generic sections */
-.section{padding:120px 24px}
-.section .section-title{font-family:"Macondo",cursive;font-weight:800;color:#fff;margin:0 0 20px 0;text-align:center}
+.section{padding:10px 24px}
+.section{margin: 250px 10px}
+#contact.section{margin: -150px 30px;}
+.section .section-title{font-family:"Macondo",cursive;font-weight:800;color:#fff;text-align:center;}
 .section .section-inner{max-width:1000px;margin:0 auto;background:linear-gradient(to top, rgba(0,0,0,0.4), rgba(255,30,30,0.15));border-radius:20px;padding:32px;border:1px solid rgba(255,0,0,0.25)}
 .about-highlights{list-style:none;margin-top:16px}
 .about-highlights li{margin:8px 0;color:#ddd}
@@ -652,7 +744,7 @@ width: 100%;
 /* About grid */
 .about-grid{display:grid;grid-template-columns:1.2fr 0.8fr;gap:24px;align-items:center}
 .about-image{width:100%;height:auto;border-radius:14px;border:1px solid rgba(255,0,0,0.25)}
-@media(max-width:900px){.about-grid{grid-template-columns:1fr}}
+@media(max-width:900px){.about-grid{grid-template-columns:1fr}.section{margin: -10px 10px}#contact.section{margin: 50px 10px;}}
 
 /* Contact form */
 .contact-form{display:grid;gap:14px;margin-top:10px}
@@ -660,7 +752,7 @@ width: 100%;
 .form-row label{font-size:14px;color:#bbb}
 .form-row input,.form-row textarea{background:#0f0f0f;border:1px solid rgba(255,0,0,0.35);color:#fff;border-radius:10px;padding:12px;outline:none}
 .form-row input:focus,.form-row textarea:focus{box-shadow:0 0 0 2px rgba(255,0,0,0.35)}
-.btn-primary{background:#ff1f1f;border:none;color:#fff;padding:12px 18px;border-radius:12px;cursor:pointer;transition:transform .15s ease, box-shadow .2s ease}
+.btn-primary{background:#ff1f1f;border:none;color:#fff;padding:12px 18px;margin-top:12px;width: 100%; border-radius:12px;cursor:pointer;transition:transform .15s ease, box-shadow .2s ease}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(255,0,0,.35)}
 .form-status{margin-top:6px;min-height:20px}
 
