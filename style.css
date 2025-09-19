@@ -851,9 +851,10 @@ body.light .form-row input,body.light .form-row textarea{background:#fff;color:#
     .item{padding:10px}
     .replies{margin-left:48px}
     .reply-box{margin-left: 3px;width: 60%;}
-    .avatar{width:40px;height:40px}
+    .avatar{width:40px;height:20px}
   }
   /*comment sec end*/
+
 
 
 
