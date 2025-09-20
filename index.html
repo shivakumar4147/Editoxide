@@ -250,9 +250,6 @@
 
 
 
-
-
-
 </body>
 
 
@@ -314,6 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
       listEl.innerHTML = '<div class="muted center">No comments yet — be the first!</div>';
       return;
     }
+    
 
     comments.slice().reverse().forEach(c => {
       const item = document.createElement("div");
@@ -547,11 +545,38 @@ document.addEventListener('DOMContentLoaded', () => {
 repliesWrap.className = "replies";
 
 
+
+
+
 function randomAvatar(seed) {
   // Using Dicebear Avatars
   const s = seed || Math.random().toString(36).substring(2, 8);
   return `https://api.dicebear.com/6.x/identicon/svg?seed=${s}`;
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Mobile sidebar toggle
+  const toggleBtn = document.querySelector(".menu-toggle");
+  const sidebar = document.querySelector(".sidebar");
+  const overlay = document.querySelector(".overlay");
+
+  toggleBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("active");
+  });
+
+  overlay.addEventListener("click", () => {
+    sidebar.classList.remove("active");
+  });
+
+  // Close sidebar when clicking on any nav link
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+    });
+  });
+});
+
+
 
 
 });
